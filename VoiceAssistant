@@ -1,21 +1,27 @@
+import datetime
 import pyttsx3
 import speech_recognition as sr
 import pyjokes
 import pywhatkit
-import yfinance as yf
 import webbrowser
-import datetime
 import wikipedia
+import yfinance as yf
+import math
 
-# Language config
+#  Language config
 engine = pyttsx3.init()
-# Voices database
-id1= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_ES-ES_HELENA_11.0" # Spanish.
-id2= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0" # English
+
+# Voices database(There´s just two, Spanish, as it is my mother tongue, and English, which is the language we work in this code
+# but it´s possible to get more voices databases. These ones are the ones I have by default.)
+
+# Spanish.
+id1 = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_ES-ES_HELENA_11.0"
+# English
+id2 = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0"
+
 
 # Micro listening and get audio converted into a text
 def audio_into_text():
-
     # Var to storage the recognizer
     r = sr.Recognizer()
 
@@ -23,7 +29,7 @@ def audio_into_text():
     with sr.Microphone() as origen:
 
         # Waiting time
-        r.pause_threshold = 0.6 # Waiting time value
+        r.pause_threshold = 0.6  # Waiting time value
 
         # Recording can begin
         print("Say something")
@@ -49,15 +55,15 @@ def audio_into_text():
             # Go back to error
             return "Still waiting"
 
-        #  In case petition not resolved
+        # In case petition not resolved
         except sr.RequestError:
-            #  Audio not recogniced
+            # Audio not recogniced
             print("Server not responding")
 
-            #  Go back to error
+            # Go back to error
             return "Still waiting"
 
-        #  Error unexpected
+        # Error unexpected
         except:
             # Go back to error
             print("Something went wrong")
@@ -66,20 +72,34 @@ def audio_into_text():
             return "Still waiting"
 
 
-#  Writing into audio transforming
+# Writing into audio transforming
 
-#  Assistan listens function
+# Speaking assistant function
 def speak(message):
-
     # Turn on Pyttsx3 engine
     engine = pyttsx3.init()
-    engine.setProperty("voice", id2) # Var to choose the voice selected
+    engine.setProperty("voice", id2)  # Var to choose the voice selected
 
     # Pronounce message
     engine.say(message)
 
     engine.runAndWait()
 
+# Initial salute
+def initial_salute():
+    # Var with the salute depending on which hour it is
+    hour = datetime.datetime.now()
+    if hour.hour < 6 or hour.hour > 20:  # Before 6 a.m. and after 8 p.m.
+        day_moment = "Good night"
+    elif 6 <= hour.hour < 13:  # 6 a.m. or after and before than 1 p.m.
+        day_moment = "Good morning"
+    else:
+        day_moment = "Good afternoon"  # For the rest of hours
+
+    # say salute
+    speak(f"{day_moment}. I´m your voice assistant")
+
+initial_salute()
 
 # This is a test. I wanted to hear how the voice says the initial salute, dates and hours. Just for fun.
 def day_asking():
@@ -88,24 +108,26 @@ def day_asking():
     print(day)
 
     # Var for day of the week
-    week_day=day.weekday()
-    print(week_day)
+    week_day = day.weekday()
 
     # dict for day names
-    calendar = {0:"Monday",
-                  1:"Tuesday",
-                  2:"Wednesday",
-                  3:"Thursday",
-                  4:"Friday",
-                  5:"Saturday",
-                  6:"Sunday"}
+    calendar = {0: "Monday",
+                1: "Tuesday",
+                2: "Wednesday",
+                3: "Thursday",
+                4: "Friday",
+                5: "Saturday",
+                6: "Sunday"}
 
     # Say day of the week
-    speak(f"It´s {calendar[week_day]}")
+    day_name = calendar[week_day] # This line is a var to read the actual day name
+    
+    print(f"It's {day_name}") # Prints the name of the actual day
+    speak(f"It´s {calendar[week_day]}") #It says the day
 
 day_asking()
 
-# Ask for the hour
+# Hour function
 def hour_asking():
     hour = datetime.datetime.now()
     hour = f"Right now it´s {hour.hour}:{hour.minute}:{hour.second}"
@@ -116,114 +138,142 @@ def hour_asking():
 
 hour_asking()
 
-# From here the test ends. This is where real fun begins and this is the real voice assistant program.
+speak("What can I do for you?")
 
-# Initial salute
-def initial_salute():
+def calculate_math(expression):
+    try:
+        result = eval(expression, {"__builtins__": None}, {"math": math})
+        return f"The result of {expression} is {result}"
+    except Exception as e:
+        return f"Error to calculate: {str(e)}"
 
-    # Var with the salute depending on which hour it is
-    hour = datetime.datetime.now()
-    if hour.hour < 6 or hour.hour > 20: # Before 6 a.m. and after 8 p.m.
-        day_moment = "Good nights"
-    elif 6 <= hour.hour < 13: # 6 a.m. or after and before than 1 p.m.
-        day_moment = "Good morning"
-    else:
-        day_moment = "Good afternoon" # For the rest of hours
-
-    # say salute
-    speak(f"{day_moment}. I´m your voice assistant, what can I do for you?.")
-
-initial_salute()
-
-# petitions
+# Petitions
 
 def petitions():
-
     # Activate initial salute
 
     # Loop to begin the voice commands without stopping
-    begin = True# It´s on
+    begin = True  # It´s on
 
     while begin:
         # Micro activate and save petition in a string
         petition = audio_into_text().lower()
 
-        if "open youtube" in petition: # Opens the main page of YouTube
+        if "open youtube" in petition:  # Opens the main page of YouTube
             speak("Opening youtube")
             webbrowser.open("https://www.youtube.com")
             continue
 
-        elif "open browser" in petition: # Opens the browser. Google Chrome chosen in this case.
+        elif "open browser" in petition:  # Opens the browser. Google Chrome chosen in this case.
             speak("Opening browser")
             webbrowser.open("https://www.google.com")
             continue
 
-        elif "what day is today" in petition: # Says the actual day
+        elif "what day is today" in petition:  # Says the actual day
             day_asking()
             continue
 
-        elif "what time is it" in petition: # Says the actual hour
+        elif "what time is it" in petition:  # Says the actual hour
             hour_asking()
             continue
 
-        elif "need some holidays" in petition: # Opens a holiday´s web
+        elif "calculate" in petition: # Calculates math operationes
+            expression = petition.replace("calculate", "") # Say "calculate" and the nums with the operation
+            result = calculate_math(expression)
+            print(result) # Print the result in screen
+            speak(result)
+            continue
+
+        elif "need some holidays" in petition:  # Opens a travels web
             speak("Opening vueling")
             webbrowser.open("https://www.vueling.com")
             continue
 
-        elif "i want to change my job" in petition: # Opens a holiday´s web
+        elif "i want to change my job" in petition:  # Opens a holiday´s web
             speak("Opening LinkedIn")
             webbrowser.open("https://www.linkedin.com")
             continue
 
-        elif "search in wikipedia" in petition: # Searches in Wikipedia with the petition aske
+        elif "search in wikipedia" in petition:  # Searches in Wikipedia with the petition aske
             speak("searching in wikipedia")
             petition = petition.replace("Search in wikipedia", "")
-            wikipedia.set_lang("en") # Search in English
-            result= wikipedia.summary(petition, sentences= 1) # To obtain just one result
+            wikipedia.set_lang("en")  # Search in English
+            result = wikipedia.summary(petition, sentences=1)  # To obtain just one result
             speak("Wikipedia says: ")
             speak(result)
             continue
 
-        elif "search in the internet" in petition: # Searches in Internet with the petition asked
+        elif "search in the internet" in petition:  # Searches in Internet with the petition asked
             speak("Diving in the Net")
             petition = petition.replace("search in Internet", "")
-            pywhatkit.search(petition)# Para buscar en internet
+            pywhatkit.search(petition)  # Para buscar en internet
             speak("This is what I found: ")
             continue
 
-        elif "play" in petition: # Opens YouTube with the petition asked after say "play"
+        elif "let´s talk about something" in petition:
+            speak("Ok, what do you wanna talk about?")
+
+            if "how was your day today?" in petition:
+                speak("You know, doing chores, bit busy and waiting for your orders. How was yours?")
+
+            if "sad" in petition or "a bad day" in petition:
+                speak("I´m sorry to hear about that. Is there anything I can do for you?")
+
+                if "yes" in petition:
+                    speak("Tell me")
+
+                    if "play" in petition:
+                        speak("Enjoy it")
+                        pywhatkit.playonyt(petition)
+                    if "tell me a joke" in petition:
+                        speak(pyjokes.get_joke("en-US"))
+
+                    if "i want to change my job" in petition:
+                        speak("Opening LinkedIn. You can do it!")
+                        webbrowser.open("https://www.linkedin.com")
+
+                    if "i need holidays" in petition:
+                        speak("Let´s see what can we find in vueling")
+                        webbrowser.open("https://www.vueling.com")
+                        continue
+
+            if "great" or "happy" or "a good day" in petition:
+                speak("Glad to hear about good news!")
+                continue
+
+
+        elif "play" in petition:  # Opens YouTube with the petition asked after "play" said
             speak("Let´s do it!")
-            pywhatkit.playonyt(petition) # playonyt is a library that works with YouTube
+            pywhatkit.playonyt(petition)  # playonyt is a library that works with YouTube
             continue
 
-        elif "tell me a joke" in petition: # Just for jokes
-            speak(pyjokes.get_joke("es"))
+        elif "tell me a joke" in petition:  # Just for jokes
+            speak(pyjokes.get_joke("en-US"))
             continue
 
-        elif "stock market value" in petition: # To see the stock market value of the enterprises below
+        elif "stock market value" in petition:  # To see the stock market value of the enterprises below
             action = petition.split("of")[-1].strip()
-            wallet = {"apple":"APPL",
-                       "amazon":"AMZN",
-                        "google":"GOOGL"}
+            wallet = {"apple": "AAPL",
+                      "amazon": "AMZN",
+                      "google": "GOOGL"}
             try:
-                stock_market_looked_for = wallet[action]
-                stock_market_looked_for = yf.Ticker(stock_market_looked_for)
-                actual_price = stock_market_looked_for.info["regularMarketPrice"]
-                speak(f"This is what I found:\nThe price of {action} is {actual_price}")
-                continue
-
-            except:
-                speak("Result not found")
-                continue
+                stock_market_looked_for = wallet.get(action.lower())
+                if stock_market_looked_for:
+                    stock_market_looked_for = yf.Ticker(stock_market_looked_for)
+                    actual_price = stock_market_looked_for.info["regularMarketPrice"]
+                    speak(f"This is what I found:\nThe price of {action} is {actual_price}")
+                else:
+                    speak("Company not found in the wallet.")
+            except Exception as e:
+                speak(f"An error occurred: {str(e)}")
 
         elif "goodbye" in petition:
             speak("See you soon, I´ll be here whenever you need me")
             break
 
+
 petitions()
 
-
-"""# This is a loop to see the available voices in the system
+"""This is a loop to see the available voices in the system
 for voice in engine.getProperty("voices"):
     print(voice)"""
