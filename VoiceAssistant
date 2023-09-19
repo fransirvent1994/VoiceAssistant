@@ -12,7 +12,7 @@ import math
 engine = pyttsx3.init()
 
 # Voices database(There´s just two, Spanish, as it is my mother tongue, and English, which is the language we work in this code
-# but it´s possible to get more voices databases. These ones are the ones I have by default.)
+# but it´s possible to get more voices databases. These are the ones I have by default.)
 
 # Spanish.
 id1 = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_ES-ES_HELENA_11.0"
@@ -121,7 +121,6 @@ def day_asking():
 
     # Say day of the week
     day_name = calendar[week_day] # This line is a var to read the actual day name
-    
     print(f"It's {day_name}") # Prints the name of the actual day
     speak(f"It´s {calendar[week_day]}") #It says the day
 
@@ -206,41 +205,14 @@ def petitions():
         elif "search in the internet" in petition:  # Searches in Internet with the petition asked
             speak("Diving in the Net")
             petition = petition.replace("search in Internet", "")
-            pywhatkit.search(petition)  # Para buscar en internet
+            pywhatkit.search(petition)  # Search in internet
+            print(f"This is what I found: {pywhatkit.search(petition)}")
             speak("This is what I found: ")
             continue
 
-        elif "let´s talk about something" in petition:
-            speak("Ok, what do you wanna talk about?")
-
-            if "how was your day today?" in petition:
-                speak("You know, doing chores, bit busy and waiting for your orders. How was yours?")
-
-            if "sad" in petition or "a bad day" in petition:
-                speak("I´m sorry to hear about that. Is there anything I can do for you?")
-
-                if "yes" in petition:
-                    speak("Tell me")
-
-                    if "play" in petition:
-                        speak("Enjoy it")
-                        pywhatkit.playonyt(petition)
-                    if "tell me a joke" in petition:
-                        speak(pyjokes.get_joke("en-US"))
-
-                    if "i want to change my job" in petition:
-                        speak("Opening LinkedIn. You can do it!")
-                        webbrowser.open("https://www.linkedin.com")
-
-                    if "i need holidays" in petition:
-                        speak("Let´s see what can we find in vueling")
-                        webbrowser.open("https://www.vueling.com")
-                        continue
-
-            if "great" or "happy" or "a good day" in petition:
-                speak("Glad to hear about good news!")
-                continue
-
+        elif "like to go out" in petition:
+            speak("I would invite you to a beer, but I have no money")
+            continue
 
         elif "play" in petition:  # Opens YouTube with the petition asked after "play" said
             speak("Let´s do it!")
@@ -248,7 +220,7 @@ def petitions():
             continue
 
         elif "tell me a joke" in petition:  # Just for jokes
-            speak(pyjokes.get_joke("en-US"))
+            speak(pyjokes.get_joke("en"))
             continue
 
         elif "stock market value" in petition:  # To see the stock market value of the enterprises below
